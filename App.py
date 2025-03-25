@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.linalg import lu
+from scipy.linalg import lu, qr
 
 class App:
     def __init__(self, matriz, vector):
@@ -102,6 +102,22 @@ class App:
         except:
             return "No se pudo resolver por Gauss-Jordan."
     
+    def resolver_por_qr(self):
+        print("QR")
+        try:
+            Q, R = qr(self.matriz)
+            print("\nMatriz Q (ortogonal):")
+            print(Q)
+            print("\nMatriz R (triangular superior):")
+            print(R)
+
+            # Resolver el sistema Rx = Q^T * b
+            b_q = np.dot(Q.T, self.vector)
+            x = np.linalg.solve(R, b_q)
+            return x
+        except np.linalg.LinAlgError:
+            return "La factorización QR no es posible para esta matriz."
+        
     def imprimir_sistema(self):
         for i in range(self.dimension):
             ecuacion = " + ".join(f"{self.matriz[i, j]}x{j+1}" for j in range(self.dimension))
@@ -152,6 +168,8 @@ def main():
         print("----------------------------------------------------------------------------------------")
         print("\nSOLUCIÓN POR LU:", sistema.resolver_por_lu())
         print("----------------------------------------------------------------------------------------")
+        print("\nSOLUCIÓN POR QR:", sistema.resolver_por_qr())
+        print("----------------------------------------------------------------------------------------")
 
         # Preguntar condición inicial para Jacobi
         print("\n¿Deseas ingresar una condición inicial para Jacobi?")
@@ -175,9 +193,9 @@ def main():
                     except ValueError:
                         print("Error: Solo se permiten números reales válidos.")
 
-        print("SOLUCIÓN POR JACOBI:", sistema.resolver_por_jacobi(x0=condicion_inicial))
+        print("\nSOLUCIÓN POR JACOBI:", sistema.resolver_por_jacobi(x0=condicion_inicial))
         print("----------------------------------------------------------------------------------------")
-        print("SOLUCIÓN POR GAUSS-JORDAN:", sistema.resolver_por_gauss_jordan())
+        print("\nSOLUCIÓN POR GAUSS-JORDAN:", sistema.resolver_por_gauss_jordan())
         print("----------------------------------------------------------------------------------------")
 
 if __name__ == "__main__":
