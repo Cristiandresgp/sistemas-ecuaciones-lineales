@@ -111,12 +111,17 @@ class App:
             print("\nMatriz R (triangular superior):")
             print(R)
 
+            # Validar si la matriz R es singular o mal condicionada
+            if np.any(np.abs(np.diag(R)) < 1e-12):
+                return "La factorización QR no puede usarse porque la matriz es singular o está mal condicionada."
+
             # Resolver el sistema Rx = Q^T * b
             b_q = np.dot(Q.T, self.vector)
             x = np.linalg.solve(R, b_q)
             return x
         except np.linalg.LinAlgError:
             return "La factorización QR no es posible para esta matriz."
+
         
     def imprimir_sistema(self):
         for i in range(self.dimension):
