@@ -22,7 +22,7 @@ class App:
             print("\nMatriz U (triangular superior):")
             print(U)
 
-            # 🚨 Aplica la permutación a A y b antes de resolver
+            # Aplica la permutación a A y b antes de resolver
             A_permutada = P @ self.matriz
             b_permutada = P @ self.vector
 
@@ -38,7 +38,7 @@ class App:
         P, L, U = lu(self.matriz)
         return P, L, U
 
-    def resolver_por_jacobi(self, tol=1e-10, max_iter=1000):
+    def resolver_por_jacobi(self, tol=1e-10, max_iter=1000, x0=None):
         print("JACOBI")
         print("\nSistema original:")
         self.imprimir_sistema()
@@ -72,10 +72,11 @@ class App:
         else:
             print("\nLa matriz es diagonalmente dominante. Se procede a resolver.")
 
-        # Estas variables deben estar disponibles en ambos casos
         D = np.diag(self.matriz)
         R = self.matriz - np.diagflat(D)
-        x = np.zeros_like(self.vector)
+
+        # Usar condición inicial proporcionada o por defecto (ceros)
+        x = np.zeros_like(self.vector) if x0 is None else np.array(x0, dtype=float)
 
         for _ in range(max_iter):
             x_nuevo = (self.vector - np.dot(R, x)) / D
@@ -84,7 +85,6 @@ class App:
             x = x_nuevo
 
         return "El método de Jacobi no convergió."
-
 
     def resolver_por_gauss_jordan(self):
         print("GAUSS-JORDAN\n")
@@ -109,43 +109,76 @@ class App:
         print("")
 
 def main():
-    n = 0
-    while True:
-        entrada = input("Ingrese el tamaño del sistema (2, 3 o 4): ")
-        if entrada.isdigit():
-            n = int(entrada)
-            if n in [2, 3, 4]:
+        n = 0
+        while True:
+            entrada = input("Ingrese el tamaño del sistema (2, 3 o 4): ")
+            if entrada.isdigit():
+                n = int(entrada)
+                if n in [2, 3, 4]:
+                    break
+            print("\nSolo se permite ingresar 2, 3 o 4.\n")
+
+        matriz = []
+        vector = []
+
+        print("\nIntroduce los valores de la matriz A:")
+        for i in range(n):
+            fila = []
+            for j in range(n):
+                while True:
+                    try:
+                        valor = float(input(f"A[{i+1}][{j+1}]: "))
+                        fila.append(valor)
+                        break
+                    except ValueError:
+                        print("Entrada inválida. Ingresa un número.")
+            matriz.append(fila)
+
+        print("\nIntroduce los valores del vector b:")
+        for i in range(n):
+            while True:
+                try:
+                    valor = float(input(f"b[{i+1}]: "))
+                    vector.append(valor)
+                    break
+                except ValueError:
+                    print("Entrada inválida. Ingresa un número.")
+
+        sistema = App(matriz, vector)
+
+        print("----------------------------------------------------------------------------------------")
+        print("Sistema de ecuaciones:")
+        sistema.imprimir_sistema()
+        print("----------------------------------------------------------------------------------------")
+        print("\nSOLUCIÓN POR LU:", sistema.resolver_por_lu())
+        print("----------------------------------------------------------------------------------------")
+
+        # Preguntar condición inicial para Jacobi
+        print("\n¿Deseas ingresar una condición inicial para Jacobi?")
+        print(f"Presiona ENTER para usar la condición clásica (0,...,0), o escribe {n} números separados por espacio.")
+        
+        while True:
+            entrada_inicial = input(f"Condición inicial (longitud {n}): ").strip()
+            if entrada_inicial == "":
+                condicion_inicial = None
+                print(f"✔️ Se usará la condición clásica: {[0.0]*n}")
                 break
-        print("\nSolo se permite ingresar 2, 3 o 4.\n")
+            else:
+                partes = entrada_inicial.split()
+                if len(partes) != n:
+                    print(f"Error: Debes ingresar exactamente {n} valores.")
+                else:
+                    try:
+                        condicion_inicial = [float(x) for x in partes]
+                        print(f"✔️ Condición inicial personalizada seleccionada: {condicion_inicial}")
+                        break
+                    except ValueError:
+                        print("Error: Solo se permiten números reales válidos.")
 
-    matriz = []
-    vector = []
-
-    print("\nIntroduce los valores de la matriz A:")
-    for i in range(n):
-        fila = []
-        for j in range(n):
-            valor = float(input(f"A[{i+1}][{j+1}]: "))
-            fila.append(valor)
-        matriz.append(fila)
-
-    print("\nIntroduce los valores del vector b:")
-    for i in range(n):
-        valor = float(input(f"b[{i+1}]: "))
-        vector.append(valor)
-
-    sistema = App(matriz, vector)
-
-    print("----------------------------------------------------------------------------------------")
-    print("Sistema de ecuaciones:")
-    sistema.imprimir_sistema()
-    print("----------------------------------------------------------------------------------------")
-    print("\nSOLUCIÓN POR LU:", sistema.resolver_por_lu())
-    print("----------------------------------------------------------------------------------------")
-    print("SOLUCIÓN POR JACOBI:", sistema.resolver_por_jacobi())
-    print("----------------------------------------------------------------------------------------")
-    print("SOLUCIÓN POR GAUSS-JORDAN:", sistema.resolver_por_gauss_jordan())
-    print("----------------------------------------------------------------------------------------")
+        print("SOLUCIÓN POR JACOBI:", sistema.resolver_por_jacobi(x0=condicion_inicial))
+        print("----------------------------------------------------------------------------------------")
+        print("SOLUCIÓN POR GAUSS-JORDAN:", sistema.resolver_por_gauss_jordan())
+        print("----------------------------------------------------------------------------------------")
 
 if __name__ == "__main__":
     main()
