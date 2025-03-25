@@ -179,7 +179,7 @@ def main():
             entrada_inicial = input(f"Condición inicial (longitud {n}): ").strip()
             if entrada_inicial == "":
                 condicion_inicial = None
-                print(f"✔️ Se usará la condición clásica: {[0.0]*n}")
+                print(f"\n✔️ Se usará la condición clásica: {[0.0]*n}\n")
                 break
             else:
                 partes = entrada_inicial.split()
@@ -188,7 +188,7 @@ def main():
                 else:
                     try:
                         condicion_inicial = [float(x) for x in partes]
-                        print(f"✔️ Condición inicial personalizada seleccionada: {condicion_inicial}")
+                        print(f"\n✔️ Condición inicial personalizada seleccionada: {condicion_inicial}\n")
                         break
                     except ValueError:
                         print("Error: Solo se permiten números reales válidos.")
